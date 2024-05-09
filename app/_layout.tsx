@@ -1,56 +1,65 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { SplashScreen, Stack } from 'expo-router';
-import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import Colors from "@/constants/Colors";
+import { Stack, useNavigation } from "expo-router";
+import { TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import CustomHeader from "@/components/CustomHeader/CustomHeader";
 
 export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
+    // Catch any errors thrown by the Layout component.
+    ErrorBoundary,
+} from "expo-router";
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
+    // Ensure that reloading on `/modal` keeps a back button present.
+    initialRouteName: "index",
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+export default function RootLayoutNav() {
+    const navigation = useNavigation();
 
-export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
-  });
+    return (
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <BottomSheetModalProvider>
+                <Stack>
+                    <Stack.Screen
+                        name="index"
+                        options={{
+                            headerTitle: "Beer-warehouse",
+                            headerStyle: { backgroundColor: Colors.primary },
+                            headerTintColor: "#fff",
+                            contentStyle: { backgroundColor: Colors.secondary },
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
-  useEffect(() => {
-    if (error) throw error;
-  }, [error]);
+                            header: () => <CustomHeader />,
+                        }}
+                    />
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
-    </ThemeProvider>
-  );
+                    <Stack.Screen
+                        name="(modal)/filter"
+                        options={{
+                            presentation: "modal",
+                            headerTitle: "Filter",
+                            headerShadowVisible: false,
+                            headerStyle: { backgroundColor: Colors.lightGrey },
+                            headerTitleStyle: { color: Colors.primary },
+                            headerLeft: () => (
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        navigation.goBack();
+                                    }}
+                                >
+                                    <Ionicons
+                                        name="close-outline"
+                                        size={28}
+                                        color={Colors.primary}
+                                    />
+                                </TouchableOpacity>
+                            ),
+                        }}
+                    />
+                </Stack>
+            </BottomSheetModalProvider>
+        </GestureHandlerRootView>
+    );
 }
